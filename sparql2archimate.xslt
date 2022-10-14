@@ -25,38 +25,99 @@
 	  				<xsl:call-template name="result"/>
 		    		</xsl:for-each>
 			  	</elements>
+			  	<relationships>
+  				<xsl:for-each select="sparql:result">
+	  				<xsl:call-template name="relationship"/>
+		    		</xsl:for-each>
+			  	</relationships>
+			  	<propertyDefinitions>
+				<xsl:for-each select="sparql:result">
+	  				<xsl:call-template name="propertyDefinition"/>
+		    		</xsl:for-each>
+			  	</propertyDefinitions>
 			</model>
 		</xsl:template>	
-
+		
 		<xsl:template name="result">
 			<xsl:variable name="uri" select="sparql:binding/sparql:uri" />
 			<xsl:variable name="s" select="./sparql:binding[@name='s']" />
 			<xsl:variable name="p" select="./sparql:binding[@name='p']" />
 			<xsl:variable name="o" select="./sparql:binding[@name='o']" />
-			<xsl:variable name="label" select="substring-after($s, '_')" />
-			<xsl:variable name="type" select="substring-before($label, '_')" />
+			<xsl:if test="$p = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'">
+				<xsl:variable name="type" select="substring-after($o, '#')" />
+		                <xsl:if test="	$type = 'Capability' or 
+		                		$type = 'Outcome' or 
+		                		$type = 'WorkPackage'">                         
+						<element>
+							<xsl:attribute name="xsi:type">
+				    				<xsl:value-of select="$type"/>
+				    			</xsl:attribute>	
+							<xsl:for-each select="//sparql:binding">
+								<!-- identifier -->
+								<xsl:if test="sparql:uri[text() = $s/sparql:uri/text()]">
+									<xsl:variable name="nuri" select=".//following-sibling::sparql:binding/sparql:uri/text()" />
+									<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#identifier'">
+									<xsl:attribute name="identifier">
+		    								<xsl:value-of select=".//following::sparql:binding[@name='o']"/>
+		    							</xsl:attribute>
+	  								</xsl:if>
+			  					</xsl:if>
+			  					<!-- name -->
+			  					<xsl:if test="sparql:uri[text() = $s/sparql:uri/text()]">
+									<xsl:variable name="nuri" select=".//following-sibling::sparql:binding/sparql:uri/text()" />
+									<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#name'">
+									<name xml:lang="en">
+		    								<xsl:value-of select=".//following::sparql:binding[@name='o']"/>
+		    							</name>
+	  								</xsl:if>
+			  					</xsl:if>
+			  					<xsl:if test="sparql:uri[text() = $s/sparql:uri/text()]">
+									<xsl:variable name="nuri" select=".//following-sibling::sparql:binding/sparql:uri/text()" />
+									<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#properties'">
+									<properties>
+		    								<xsl:call-template name="properties">
+		    									<xsl:with-param name="propertiesType" select=".//following::sparql:binding[@name='o']" />
+		    								</xsl:call-template>
+		    							</properties>
+	  								</xsl:if>
+			  					</xsl:if>
+			  					
+			  						
+				    			</xsl:for-each>	
 
-
-			<!-- use the result with identifier as root -->
-			<xsl:if test="$uri/text() = 'http://www.opengroup.org/xsd/archimate/3.0/#identifier' 
-					and $type != 'model' 
-					and $type != 'PropertyDefinitionType'">
-				<xsl:choose>                                                               
-					<xsl:when test="$type = 'Realization'">   
+					    	</element>
+			    		</xsl:if>
+		    		</xsl:if>
+		</xsl:template>
+	
+	
+		<xsl:template name="relationship">
+			<xsl:variable name="uri" select="sparql:binding/sparql:uri" />
+			<xsl:variable name="s" select="./sparql:binding[@name='s']" />
+			<xsl:variable name="p" select="./sparql:binding[@name='p']" />
+			<xsl:variable name="o" select="./sparql:binding[@name='o']" />
+			
+			<xsl:if test="$p = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'">
+				<xsl:variable name="type" select="substring-after($o, '#')" />                                                          
+				<xsl:if test="$type = 'Realization'">   
 					<relationship xsi:type="Realization">
-							<xsl:attribute name="identifier">
-				    				<xsl:value-of select="./sparql:binding[@name='o']"/>
-				    			</xsl:attribute>
-				    			<!-- search fot target and source -->
+				    			
 							<xsl:for-each select="//sparql:binding">
 								<xsl:if test="sparql:uri[text() = $s/sparql:uri/text()]">
 								<xsl:variable name="nuri" select=".//following-sibling::sparql:binding/sparql:uri/text()" />
-								<xsl:message><xsl:value-of select="$nuri"/></xsl:message>
+									<!-- identifier -->
+									<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#identifier'">
+									<xsl:attribute name="identifier">
+		    								<xsl:value-of select=".//following::sparql:binding[@name='o']/sparql:literal/text()"/>
+		    							</xsl:attribute>
+	  								</xsl:if>
+	  								<!-- target -->
 			  						<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#target'">
 										<xsl:attribute name="target">
 				    							<xsl:value-of select=".//following::sparql:binding[@name='o']"/>
 				    						</xsl:attribute>
 			  						</xsl:if>
+			  						<!-- source -->
 			  						<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#source'">
 										<xsl:attribute name="source">
 				    							<xsl:value-of select=".//following::sparql:binding[@name='o']"/>
@@ -65,28 +126,94 @@
 			  					</xsl:if>
 				    			</xsl:for-each>	
 					</relationship>
-					</xsl:when>
-					<xsl:otherwise>                                                        
-					<element>
-							<xsl:attribute name="identifier">
-				    				<xsl:value-of select="./sparql:binding[@name='o']"/>
-				    			</xsl:attribute>
+				</xsl:if> 
+			</xsl:if> 
+		</xsl:template>		
+			
+			
+			
+
+		<xsl:template name="propertyDefinition">		
+			<xsl:variable name="uri" select="sparql:binding/sparql:uri" />
+			<xsl:variable name="s" select="./sparql:binding[@name='s']" />
+			<xsl:variable name="p" select="./sparql:binding[@name='p']" />
+			<xsl:variable name="o" select="./sparql:binding[@name='o']" />
+
+			<xsl:if test="$p = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'">
+				<xsl:variable name="type" select="substring-after($o, '#')" />
+		                <xsl:if test="$type = 'PropertyDefinitionType'">                         
+						<propertyDefinition type="string">	
 							<xsl:for-each select="//sparql:binding">
+								<!-- identifier -->
 								<xsl:if test="sparql:uri[text() = $s/sparql:uri/text()]">
-									<xsl:variable name="xsitype" select=".//following-sibling::sparql:binding//following-sibling::sparql:binding/sparql:uri/text()" />
-			  						<xsl:if test=".//following-sibling::sparql:binding/sparql:uri[text() = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type']">
-										<xsl:attribute name="xsi:type">
-				    							<xsl:value-of select="substring-after($xsitype, '#')"/>
-				    						</xsl:attribute>
-			  						</xsl:if>
+									<xsl:variable name="nuri" select=".//following-sibling::sparql:binding/sparql:uri/text()" />
+									<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#identifier'">
+									<xsl:attribute name="identifier">
+		    								<xsl:value-of select=".//following::sparql:binding[@name='o']/sparql:literal/text()"/>
+		    							</xsl:attribute>
+	  								</xsl:if>
+			  					</xsl:if>
+			  					<!-- name -->
+			  					<xsl:if test="sparql:uri[text() = $s/sparql:uri/text()]">
+									<xsl:variable name="nuri" select=".//following-sibling::sparql:binding/sparql:uri/text()" />
+									<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#name'">
+									<name xml:lang="en">
+		    								<xsl:value-of select=".//following::sparql:binding[@name='o']/sparql:literal/text()"/>
+		    							</name>
+	  								</xsl:if>
 			  					</xsl:if>
 				    			</xsl:for-each>	
-				    		<name xml:lang="en">
-				    		<xsl:value-of select="$label"/>
-				    		</name>
-				    	</element>
-				    	</xsl:otherwise>
-				</xsl:choose>
-		    	</xsl:if>
+					    	</propertyDefinition>
+			    		</xsl:if>
+		    		</xsl:if>					
 		</xsl:template>
+		
+		<xsl:template name="property">
+			<xsl:param name="propertyType" />		
+			<xsl:variable name="uri" select="sparql:binding/sparql:uri" />
+			<xsl:variable name="s" select="./sparql:binding[@name='s']" />
+			<xsl:variable name="p" select="./sparql:binding[@name='p']" />
+			<xsl:variable name="o" select="./sparql:binding[@name='o']" />
+			<property>	
+				<xsl:for-each select="//sparql:binding">
+					<!-- propertyDefinitionRef -->
+					<xsl:if test="sparql:uri/text() = $propertyType">
+						<xsl:variable name="nuri" select=".//following-sibling::sparql:binding/sparql:uri/text()" />
+						<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#propertyDefinitionRef'">
+						
+						<xsl:attribute name="propertyDefinitionRef">
+							<xsl:value-of select=".//following::sparql:binding[@name='o']/sparql:literal/text()"/>
+						</xsl:attribute>
+						</xsl:if>
+  					</xsl:if>
+  					<!-- value -->
+  					<xsl:if test="sparql:uri/text() = $propertyType">
+						<xsl:variable name="nuri" select=".//following-sibling::sparql:binding/sparql:uri/text()" />
+						<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#value'">
+						<value>
+							<xsl:value-of select=".//following::sparql:binding[@name='o']/sparql:literal/text()"/>
+						</value>
+						</xsl:if>
+  					</xsl:if>
+	    			</xsl:for-each>	
+		    	</property>			
+		</xsl:template>
+		
+		<xsl:template name="properties">
+			<xsl:param name="propertiesType" />		
+			<xsl:for-each select="//sparql:binding">
+				<!-- property -->
+				<xsl:if test="sparql:uri[text() = $propertiesType]">
+					<xsl:variable name="nuri" select=".//following-sibling::sparql:binding/sparql:uri/text()" />
+					<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#property'">
+						<xsl:call-template name="property">
+		    					<xsl:with-param name="propertyType" select=".//following::sparql:binding[@name='o']/sparql:uri/text()" />
+		    				</xsl:call-template>	
+					</xsl:if>
+				</xsl:if>
+    			</xsl:for-each>	
+					
+		</xsl:template>
+
+
 </xsl:stylesheet>
