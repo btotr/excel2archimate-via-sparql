@@ -35,27 +35,58 @@
 			<xsl:variable name="o" select="./sparql:binding[@name='o']" />
 			<xsl:variable name="label" select="substring-after($s, '_')" />
 			<xsl:variable name="type" select="substring-before($label, '_')" />
-<xsl:message><xsl:value-of select="$type"/></xsl:message>
-			<xsl:if test="$uri/text() = 'http://www.opengroup.org/xsd/archimate/3.0/#identifier' and $type != 'model' and $type != 'PropertyDefinitionType'">
-			
-			<element>
-					<xsl:attribute name="identifier">
-		    				<xsl:value-of select="./sparql:binding[@name='o']"/>
-		    			</xsl:attribute>
-					<xsl:for-each select="//sparql:binding">
-						<xsl:if test="sparql:uri[text() = $s/sparql:uri/text()]">
-							<xsl:variable name="xsitype" select=".//following-sibling::sparql:binding//following-sibling::sparql:binding/sparql:uri/text()" />
-	  						<xsl:if test=".//following-sibling::sparql:binding/sparql:uri[text() = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type']">
-								<xsl:attribute name="xsi:type">
-		    							<xsl:value-of select="substring-after($xsitype, '#')"/>
-		    						</xsl:attribute>
-	  						</xsl:if>
-	  					</xsl:if>
-		    			</xsl:for-each>	
-		    		<name xml:lang="en">
-		    		<xsl:value-of select="$label"/>
-		    		</name>
-		    	</element>
+
+
+			<!-- use the result with identifier as root -->
+			<xsl:if test="$uri/text() = 'http://www.opengroup.org/xsd/archimate/3.0/#identifier' 
+					and $type != 'model' 
+					and $type != 'PropertyDefinitionType'">
+				<xsl:choose>                                                               
+					<xsl:when test="$type = 'Realization'">   
+					<relationship xsi:type="Realization">
+							<xsl:attribute name="identifier">
+				    				<xsl:value-of select="./sparql:binding[@name='o']"/>
+				    			</xsl:attribute>
+				    			<!-- search fot target and source -->
+							<xsl:for-each select="//sparql:binding">
+								<xsl:if test="sparql:uri[text() = $s/sparql:uri/text()]">
+								<xsl:variable name="nuri" select=".//following-sibling::sparql:binding/sparql:uri/text()" />
+								<xsl:message><xsl:value-of select="$nuri"/></xsl:message>
+			  						<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#target'">
+										<xsl:attribute name="target">
+				    							<xsl:value-of select=".//following::sparql:binding[@name='o']"/>
+				    						</xsl:attribute>
+			  						</xsl:if>
+			  						<xsl:if test="$nuri = 'http://www.opengroup.org/xsd/archimate/3.0/#source'">
+										<xsl:attribute name="source">
+				    							<xsl:value-of select=".//following::sparql:binding[@name='o']"/>
+				    						</xsl:attribute>
+			  						</xsl:if>
+			  					</xsl:if>
+				    			</xsl:for-each>	
+					</relationship>
+					</xsl:when>
+					<xsl:otherwise>                                                        
+					<element>
+							<xsl:attribute name="identifier">
+				    				<xsl:value-of select="./sparql:binding[@name='o']"/>
+				    			</xsl:attribute>
+							<xsl:for-each select="//sparql:binding">
+								<xsl:if test="sparql:uri[text() = $s/sparql:uri/text()]">
+									<xsl:variable name="xsitype" select=".//following-sibling::sparql:binding//following-sibling::sparql:binding/sparql:uri/text()" />
+			  						<xsl:if test=".//following-sibling::sparql:binding/sparql:uri[text() = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type']">
+										<xsl:attribute name="xsi:type">
+				    							<xsl:value-of select="substring-after($xsitype, '#')"/>
+				    						</xsl:attribute>
+			  						</xsl:if>
+			  					</xsl:if>
+				    			</xsl:for-each>	
+				    		<name xml:lang="en">
+				    		<xsl:value-of select="$label"/>
+				    		</name>
+				    	</element>
+				    	</xsl:otherwise>
+				</xsl:choose>
 		    	</xsl:if>
 		</xsl:template>
 </xsl:stylesheet>
