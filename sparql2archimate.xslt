@@ -38,46 +38,49 @@
 	</xsl:template>	
 	
 	<xsl:template name="result">
-			<xsl:variable name="s" select="./sparql:binding[@name='s']" />
-			<xsl:variable name="p" select="./sparql:binding[@name='p']" />
-			<xsl:variable name="o" select="./sparql:binding[@name='o']" />
-			<xsl:variable name="uri" select="$s/sparql:uri/text()" />
-			<xsl:variable name="type" select="substring-after($o, '#')" />
-				<xsl:if test="	$type = 'Capability' or 
-												$type = 'Outcome' or 
-												$type = 'WorkPackage'">
-					<element>
-						<xsl:attribute name="xsi:type">
-							<xsl:value-of select="$type"/>
-						</xsl:attribute>	
-						<xsl:for-each select="//sparql:result[sparql:binding[@name='s']/sparql:uri/text() = $uri]">
-									<xsl:variable name="property" select="sparql:binding[@name='p']/sparql:uri/text()" />
-									<!-- identifier -->				
-									<xsl:if test="$property = 'http://www.opengroup.org/xsd/archimate/3.0/#identifier'">
-											<xsl:attribute name="identifier">
-												<xsl:value-of select="sparql:binding[@name='o']/sparql:literal"/>
-											</xsl:attribute>
-									</xsl:if>	
-						</xsl:for-each>	
-						<xsl:for-each select="//sparql:result[sparql:binding[@name='s']/sparql:uri/text() = $uri]">
-									<xsl:variable name="property" select="sparql:binding[@name='p']/sparql:uri/text()" />
-									<!-- name -->
-									<xsl:if test="$property = 'http://www.opengroup.org/xsd/archimate/3.0/#name'">
-										<name xml:lang="en">
-											<xsl:value-of select="sparql:binding[@name='o']"/>
-		    						</name>
-	  							</xsl:if>
-									<!-- properties -->	
-									<xsl:if test="$property = 'http://www.opengroup.org/xsd/archimate/3.0/#properties'">
-										<properties>
-											<xsl:call-template name="properties">
-												<xsl:with-param name="propertiesType" select="sparql:binding[@name='o']" />
-											</xsl:call-template>
-										</properties>
-									</xsl:if>
-								</xsl:for-each>	
-							</element>
-						</xsl:if>
+		<xsl:variable name="s" select="./sparql:binding[@name='s']" />
+		<xsl:variable name="p" select="./sparql:binding[@name='p']" />
+		<xsl:variable name="o" select="./sparql:binding[@name='o']" />
+		<xsl:variable name="uri" select="$s/sparql:uri/text()" />
+		<xsl:variable name="type" select="substring-after($o, '#')" />
+		<xsl:if test="	$type = 'Capability' or 
+										$type = 'Outcome' or 
+										$type = 'WorkPackage'">
+			<element>
+				<xsl:attribute name="xsi:type">
+					<xsl:value-of select="$type"/>
+				</xsl:attribute>	
+				<xsl:for-each select="//sparql:result[sparql:binding[@name='s']/sparql:uri/text() = $uri]">
+							<xsl:variable name="property" select="sparql:binding[@name='p']/sparql:uri/text()" />
+							<!-- identifier -->				
+							<xsl:if test="$property = 'http://www.opengroup.org/xsd/archimate/3.0/#identifier'">
+									<xsl:attribute name="identifier">
+										<xsl:value-of select="sparql:binding[@name='o']/sparql:literal"/>
+									</xsl:attribute>
+							</xsl:if>	
+				</xsl:for-each>	
+				<xsl:for-each select="//sparql:result[sparql:binding[@name='s']/sparql:uri/text() = $uri]">
+							<xsl:variable name="property" select="sparql:binding[@name='p']/sparql:uri/text()" />
+							<!-- name -->
+							<xsl:if test="$property = 'http://www.opengroup.org/xsd/archimate/3.0/#name'">
+								<name xml:lang="en">
+									<xsl:value-of select="sparql:binding[@name='o']"/>
+								</name>
+							</xsl:if>
+				</xsl:for-each>	
+				<xsl:for-each select="//sparql:result[sparql:binding[@name='s']/sparql:uri/text() = $uri]">
+							<xsl:variable name="property" select="sparql:binding[@name='p']/sparql:uri/text()" />
+							<!-- properties -->	
+							<xsl:if test="$property = 'http://www.opengroup.org/xsd/archimate/3.0/#properties'">
+								<properties>
+									<xsl:call-template name="properties">
+										<xsl:with-param name="propertiesType" select="sparql:binding[@name='o']" />
+									</xsl:call-template>
+								</properties>
+							</xsl:if>
+				</xsl:for-each>	
+			</element>
+		</xsl:if>
 	</xsl:template>
 
 	<xsl:template name="relationship">
@@ -147,12 +150,12 @@
 			<xsl:variable name="property" select="sparql:binding[@name='p']/sparql:uri/text()" />
 			<xsl:if test="$property = 'http://www.opengroup.org/xsd/archimate/3.0/#propertyDefinitionRef'">
 				<xsl:attribute name="propertyDefinitionRef">
-					<xsl:value-of select=".//following::sparql:binding[@name='o']/sparql:literal/text()"/>
+					<xsl:value-of select="sparql:binding[@name='o']/sparql:literal/text()"/>
 				</xsl:attribute>
 			</xsl:if>
 			<!-- value -->
 			<xsl:if test="$property = 'http://www.opengroup.org/xsd/archimate/3.0/#value'">
-				<value>
+				<value xml:lang="en">
 					<xsl:value-of select="sparql:binding[@name='o']/sparql:literal/text()"/>
 				</value>
 			</xsl:if>

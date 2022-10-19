@@ -10,7 +10,7 @@ It mainly uses other tools to convert the intermediate states
 use [excel2rdf](https://github.com/edmondchuc/excel2rdf)
 
 ```
-excel2rdf example.xlsx example.ttl
+excel2rdf instances/import.xlsx import.ttl
 ```
  
 ### convert archimate to rdf
@@ -24,15 +24,16 @@ java -jar xsd2owl/target/xsd2owl-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 ```
 this produce a file called result.n3 and result.owl, the instances ant ontology respectivly.
 
-### join the files and query all instances
+### construct new instances and join the files
 Use [comunica-sparql-file](https://comunica.dev/docs/query/getting_started/query_cli_file/) to join the excel instatance with archimate instances. 
 
 ```
-comunica-sparql-file result.n3 example.ttl "SELECT * WHERE { ?s ?p ?o } LIMIT 100" -t 'application/sparql-results+xml' > binding.xml
+comunica-sparql-file result.n3 import.ttl -f queries/constructProperties.sparql > construct.ttl
+comunica-sparql-file result.n3 import.ttl construct.ttl "SELECT * WHERE { ?s ?p ?o }" -t 'application/sparql-results+xml' > binding.xml
 ```
  
 ### convert back to archimate
 ```
-xsltproc sparql2archimate.xslt binding.xml
+time xsltproc sparql2archimate.xslt binding.xml | tee archimate.xml
 ```
 
