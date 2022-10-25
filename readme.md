@@ -26,10 +26,14 @@ this produce a file called result.n3 and result.owl, the instances ant ontology 
 
 ### construct new instances and join the files
 Use [comunica-sparql-file](https://comunica.dev/docs/query/getting_started/query_cli_file/) to join the excel instatance with archimate instances. 
+Each sparql file is could be seen as a rule based inference query
 
 ```
-comunica-sparql-file result.n3 import.ttl -f queries/constructProperties.sparql > construct.ttl
-comunica-sparql-file result.n3 import.ttl construct.ttl "SELECT * WHERE { ?s ?p ?o }" -t 'application/sparql-results+xml' > binding.xml
+comunica-sparql-file output/result.ttl output/import-1.ttl -f ../queries/1.sparql > output/export-1.ttl 
+comunica-sparql-file output/result.ttl output/import-1.ttl -f ../queries/2.sparql > output/export-2.ttl 
+comunica-sparql-file output/result.ttl output/import-2.ttl -f ../queries/3.sparql > output/export-3.ttl 
+comunica-sparql-file output/result.ttl output/import-2.ttl -f ../queries/4.sparql > output/export-4.ttl 
+comunica-sparql-file output/*.ttl "SELECT * WHERE { ?s ?p ?o }" -t 'application/sparql-results+xml' > output/binding.xml
 ```
  
 ### convert back to archimate
