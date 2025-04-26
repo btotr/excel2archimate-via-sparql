@@ -22,10 +22,10 @@ This workflow expects a model.xml in an instances folder together with the xsd (
 ```
 java -jar xsd2owl/target/xsd2owl-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 ```
-this produce a file called result.n3 and result.owl, the instances ant ontology respectivly.
+this produce a file called result.n3 and result.owl, the instances and ontology respectivly.
 
 ### construct new instances and join the files
-Use [comunica-sparql-file](https://comunica.dev/docs/query/getting_started/query_cli_file/) to join the excel instatance with archimate instances. 
+Use [comunica-sparql-file](https://comunica.dev/docs/query/getting_started/query_cli_file/) to join the excel instances with archimate instances. 
 Each sparql file is could be seen as a rule based inference query
 
 ```
